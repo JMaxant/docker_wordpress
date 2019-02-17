@@ -37,4 +37,4 @@ This is pretty much WIP : this is a pet-project of mine to better understand and
  - Fix the way the mapping is handled (i.e: include a make setup command that will git clone a clean wordpress in a {PROJECT_NAME} folder, rather than having to clone it manually in a WordPress folder)
 
 ---
-This is **_my_** baby. I know he is probably broken and messed up but I love it the way it is. But please, fill issues, comments, forks if you want to ! :P
+This is **_my baby_** . I know he is probably broken and messed up but I love it the way it is. But please, fill issues, comments, forks if you want to ! :P
