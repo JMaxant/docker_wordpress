@@ -1,0 +1,102 @@
+version: '3'
+
+services:
+  mariadb:
+    image: wodby/mariadb:${MARIADB_TAG}
+    container_name: ${PROJECT_NAME}-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: "mysql --user=root --password=${DB_ROOT_PASSWORD} --execute \"SHOW DATABASES;\""
+      interval: 3s
+      timeout: 1s
+      retries: 5
+    labels:
+      - 'traefik.frontend.rule=Host:mariadb.${PROJECT_BASE_URL}'
+      - 'traefik.backend={$PROJECT_NAME}_mariadb'
+
+  php:
+    image: wodby/wordpress-php:${PHP_TAG}
+    container_name: ${PROJECT_NAME}-php
+    depends_on:
+      - mariadb
+    environment:
+      PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t-i -S mailhog:1025
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      PHP_FPM_USER: wodby
+      PHP_FPM_GROUP: wodby
+    volumes:
+      - ./WordPress:/var/www/html
+    labels:
+      - 'traefik.frontend.rule=Host:php.${PROJECT_BASE_URL}'
+      - 'traefik.backend={$PROJECT_NAME}_php'
+
+  nginx:
+    image: wodby/nginx:${NGINX_TAG}
+    container_name: ${PROJECT_NAME}-nginx
+    depends_on:
+      - php
+    environment:
+      NGINX_STATIC_OPEN_FILE_CACHE: "off"
+      NGINX_ERROR_LOG_LEVEL: debug
+      NGINX_BACKEND_HOST: php
+      NGINX_VHOST_PRESET: wordpress
+    volumes:
+      - ./WordPress:/var/www/html
+    labels:
+      - 'traefik.backend={$PROJECT_NAME}_nginx'
+      - 'traefik.port=80'
+      - 'traefik.frontend.rule=Host:${PROJECT_BASE_URL}'
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    container_name: ${PROJECT_NAME}-pma
+    environment:
+      PMA_HOST: ${PROJECT_NAME}-mariadb
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      PHP_UPLOAD_MAX_FILESIZE: 1G
+      PHP_MAX_INPUT_VARS: 1G
+    labels:
+      - 'traefik.enable=TRUE'
+      - 'traefik.port=80'
+      - 'traefik.frontend.rule=Host:pma.${PROJECT_BASE_URL}'
+      - 'traefik.backend={$PROJECT_NAME}_pma'
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: ${PROJECT_NAME}-mailhog
+    labels:
+      - 'traefik.backend=${PROJECT_NAME}_mailhog'
+      - 'traefik.port=8025'
+      - 'traefik.frontend.rule=Host:mailhog.${PROJECT_BASE_URL}'
+
+
+  portainer:
+    image: portainer/portainer
+    container_name: ${PROJECT_NAME}-portainer
+    command: --no-auth -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/portainer/data:/data
+    labels:
+      - 'traefik.backend=${PROJECT_NAME}_portainer'
+      - 'traefik.port=9000'
+      - 'traefik.frontend.rule=Host:portainer.${PROJECT_BASE_URL}'
+
+  traefik:
+    image: traefik
+    container_name: ${PROJECT_NAME}-traefik
+    command: -c /dev/null --web --api --docker --logLevel=INFO
+    ports:
+      - '80:80'
+      - '8080:8080'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
