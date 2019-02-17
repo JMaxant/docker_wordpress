@@ -9,4 +9,9 @@ Fine tuned to match my needs. Basically :
 
 Most of the credit goes to the [wodby crew](https://wodby.com/), who does an amazing job with those fantastic docker images. Give them some love, they deserve it
 
-This is pretty much WIP : this is a pet-project of mine to better understand and work with docker and devOps methodology. So, I plan on adding a **_Makefile_** to kickstart wordpress projects, and do the same for Drupal 8 project (and pretty much any framework that I will fancy at a given time).
+This is pretty much WIP : this is a pet-project of mine to better understand and work with docker and devOps methodology. So, I plan on
+ - adding a **_Makefile_** to kickstart wordpress projects, and do the same for Drupal 8 project (and pretty much any framework that I will fancy at a given time).
+ - Add useful documentation on how to use this. This is actually the highest priority, to be honest
+
+---
+This is **_my_** baby. I know he is probably broken and messed up but I love it the way it is. But please, fill issues, comments, forks if you want to ! :P
