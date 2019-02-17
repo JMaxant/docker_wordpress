@@ -1,4 +1,4 @@
-# Socle docker Wordpress
+# Wordpress docker boilerplate
 
 Inspired by and based on (understand : copied/pasted from) Wodby images and WordPress stack, fine tuned to match my needs. Basically :
 
